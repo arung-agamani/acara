@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { eq, sql } from 'drizzle-orm';
-import { db } from 'src/database/interface';
 import { user } from '../../database/schema';
+import { AcaraDb } from 'src/database/interface';
+import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 
 @Injectable()
 export class UsersService {
+  constructor(@Inject(DrizzleAsyncProvider) private db: AcaraDb) {}
   async findAll() {
-    return db.select().from(user).execute();
+    return this.db.select().from(user).execute();
   }
 
   async createUser(username: string, password: string) {
-    const res = await db
+    const res = await this.db
       .insert(user)
       .values({
         username,
@@ -27,7 +29,7 @@ export class UsersService {
     displayName: string,
     isActive: boolean,
   ) {
-    const res = await db
+    const res = await this.db
       .update(user)
       .set({ displayName, isActive })
       .where(eq(user.id, id));
@@ -35,7 +37,7 @@ export class UsersService {
   }
 
   async getUserById(id: string) {
-    const res = await db
+    const res = await this.db
       .select({
         id: user.id,
         username: user.username,
@@ -50,7 +52,7 @@ export class UsersService {
   }
 
   async getUserByUsername(username: string) {
-    const res = await db
+    const res = await this.db
       .select({
         id: user.id,
         username: user.username,

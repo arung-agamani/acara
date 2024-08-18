@@ -8,6 +8,7 @@ import { JwtStrategy } from './jwtStrategy';
 import { AuthController } from './auth.controller';
 import { LocalStrategy } from './localStrategy';
 import { SECRET_KEY } from 'src/constants';
+import { drizzleProvider } from '../drizzle/drizzle.provider';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { SECRET_KEY } from 'src/constants';
     PasswordService,
     LocalStrategy,
     JwtStrategy,
+    ...drizzleProvider,
   ],
   controllers: [AuthController],
   exports: [AuthService],
