@@ -8,9 +8,10 @@ import {
   Body,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwtAuthGuard';
-import { CreateAcaraEvent, EventService } from './event.service';
+import { EventService } from './event.service';
+import { CreateEventPayloadDto } from './event.dto';
 
-type AcaraEventControllerCreatePayload = Required<Omit<CreateAcaraEvent, 'id'>>;
+// type AcaraEventControllerCreatePayload = Required<Omit<CreateAcaraEvent, 'id'>>;
 
 @Controller('events')
 @UseGuards(JwtAuthGuard)
@@ -28,7 +29,7 @@ export class AcaraEventController {
   }
 
   @Post()
-  async createEvent(@Body() payload: AcaraEventControllerCreatePayload) {
+  async createEvent(@Body() payload: CreateEventPayloadDto) {
     const create = await this.eventService.createEvent(payload);
     return {
       success: true,
