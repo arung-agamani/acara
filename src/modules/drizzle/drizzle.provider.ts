@@ -1,6 +1,8 @@
-import * as Database from 'better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
+// import { PGlite } from '@electric-sql/pglite';
+import * as postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
 import * as schema from '../../database/schema';
+import { dbConfig } from 'src/database/drizzle.config';
 
 export const DrizzleAsyncProvider = 'drizzleProvider';
 
@@ -8,7 +10,7 @@ export const drizzleProvider = [
   {
     provide: DrizzleAsyncProvider,
     useFactory: async () => {
-      const sqlite = new Database('./data.db');
+      const sqlite = postgres(dbConfig);
       const db = drizzle(sqlite, { schema });
       return db;
     },

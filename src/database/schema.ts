@@ -1,32 +1,37 @@
 import { sql } from 'drizzle-orm';
+
 import {
   integer,
   primaryKey,
-  sqliteTable,
   text,
-} from 'drizzle-orm/sqlite-core';
+  pgTable,
+  timestamp,
+  boolean,
+  json,
+  serial,
+} from 'drizzle-orm/pg-core';
 
-export const user = sqliteTable('users', {
-  id: integer('id').primaryKey(),
+export const user = pgTable('users', {
+  id: serial('id').primaryKey(),
   username: text('username').notNull(),
   password: text('password').notNull(),
   displayName: text('display_name'),
-  createdAt: integer('created_at', { mode: 'timestamp' })
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
     .notNull()
-    .default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }),
-  isActive: integer('is_active', { mode: 'boolean' }),
+    .default(sql`NOW()`),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }),
+  isActive: boolean('is_active'),
 });
 
-export const event = sqliteTable('events', {
-  id: integer('id').primaryKey(),
+export const event = pgTable('events', {
+  id: serial('id').primaryKey(),
   name: text('name'),
   description: text('description'),
-  startDate: integer('start_date', { mode: 'timestamp' }),
-  endDate: integer('end_date', { mode: 'timestamp' }),
+  startDate: timestamp('start_date', { withTimezone: true, mode: 'date' }),
+  endDate: timestamp('end_date', { withTimezone: true, mode: 'date' }),
 });
 
-export const userEventMembership = sqliteTable(
+export const userEventMembership = pgTable(
   'event_memberships',
   {
     id: integer('id'),
@@ -41,7 +46,7 @@ export const userEventMembership = sqliteTable(
   },
 );
 
-export const eventInfo = sqliteTable(
+export const eventInfo = pgTable(
   'event_informations',
   {
     id: integer('id'),
@@ -56,31 +61,34 @@ export const eventInfo = sqliteTable(
   },
 );
 
-export const lnfEntry = sqliteTable('lnf_entries', {
-  id: integer('id').primaryKey(),
+export const lnfEntry = pgTable('lnf_entries', {
+  id: serial('id').primaryKey(),
   name: text('name'),
   type: text('type', { enum: ['lost', 'found', 'deposit', 'misc'] }),
   description: text('description'),
-  createdAt: integer('created_at', { mode: 'timestamp' }),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }),
-  state: integer('state', { mode: 'boolean' }),
-  metadata: text('metadata', { mode: 'json' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
+    .notNull()
+    .default(sql`NOW()`),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }),
+  state: boolean('state'),
+  metadata: json('metadata'),
+  deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'date' }),
 });
 
-export const lnfAuditLog = sqliteTable('lnf_audit_log', {
+export const lnfAuditLog = pgTable('lnf_audit_log', {
   id: integer('id').primaryKey(),
   entry_id: integer('id').references(() => lnfEntry.id),
   action: text('action', { enum: ['CREATE', 'UPDATE', 'DELETE'] }),
-  before_value: text('before_value', { mode: 'json' }),
-  after_value: text('after_value', { mode: 'json' }),
-  timestamp: integer('timestamp', { mode: 'timestamp' }),
+  before_value: json('before_value'),
+  after_value: json('after_value'),
+  timestamp: timestamp('timestamp', { withTimezone: true, mode: 'date' }),
 });
 
-export const lnfEntryAssets = sqliteTable('lnf_entry_assets', {
+export const lnfEntryAssets = pgTable('lnf_entry_assets', {
   id: integer('id').primaryKey(),
   entryId: integer('entry_id').references(() => lnfEntry.id),
   name: text('name'),
   type: text('type'),
-  size: integer('size', { mode: 'number' }),
+  size: integer('size'),
   url: text('url'),
 });

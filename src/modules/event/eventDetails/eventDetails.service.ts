@@ -33,7 +33,7 @@ export class EventDetailsService {
         set: { value },
       });
     // there should be one row affected only
-    if (res.changes === 1) return true;
+    if (res.count === 1) return true;
     return false;
   }
 
@@ -41,7 +41,7 @@ export class EventDetailsService {
     const res = await this.db
       .delete(eventInfo)
       .where(and(eq(eventInfo.eventId, id), eq(eventInfo.key, key)));
-    if (res.changes === 1) return true;
+    if (res.count === 1) return true;
     return false;
   }
 }

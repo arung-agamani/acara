@@ -40,7 +40,7 @@ export class EventMembershipService {
       .where(
         and(eq(membership.eventId, eventId), eq(membership.userId, userId)),
       );
-    if (res.changes === 0) return null;
+    if (res.count === 0) return null;
     return true;
   }
 
@@ -50,7 +50,7 @@ export class EventMembershipService {
       .where(
         and(eq(membership.eventId, eventId), eq(membership.userId, userId)),
       );
-    if (res.changes === 0) return null;
+    if (res.count === 0) return null;
     return true;
   }
 }
