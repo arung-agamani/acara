@@ -1,4 +1,4 @@
 export class SetEventDetailPayloadDto {
-  key: string;
-  value: string;
+  key!: string;
+  value!: string;
 }

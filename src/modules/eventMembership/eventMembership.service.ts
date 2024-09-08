@@ -44,7 +44,7 @@ export class EventMembershipService {
     return true;
   }
 
-  async deleteMembership(eventId, userId: number) {
+  async deleteMembership(eventId: number, userId: number) {
     const res = await this.db
       .delete(membership)
       .where(

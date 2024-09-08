@@ -2,6 +2,7 @@ import { defineConfig } from 'drizzle-kit';
 
 export const dbConfig = {
   host: 'localhost',
+  user: 'postgres',
   port: 5432,
   database: 'acara_development',
   ssl: false,

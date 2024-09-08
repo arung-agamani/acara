@@ -11,17 +11,15 @@ import { LocalAuthGuard } from './localAuthGuard';
 import { JwtAuthGuard } from './jwtAuthGuard';
 import { Request as ExpressRequest, Response } from 'express';
 import { AUTH_COOKIE_NAME } from 'src/constants';
+import { RegisterPayloadDto } from './auth.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async register(
-    @Body('username') username: string,
-    @Body('password') password: string,
-  ) {
-    await this.authService.register(username, password);
+  async register(@Body() payload: RegisterPayloadDto) {
+    await this.authService.register(payload.username, payload.password);
     return {
       success: true,
       data: 'User registered successfully',
@@ -44,7 +42,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('protected')
-  getHello(@Request() req) {
-    return `Hello ${req.user.username}`;
+  getHello(@Request() req: ExpressRequest) {
+    return `Hello ${req.user?.username}`;
   }
 }

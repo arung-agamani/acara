@@ -12,14 +12,14 @@ enum ItemType {
 }
 
 abstract class InventoryService {
-  type: ItemType;
+  type!: ItemType;
   abstract createItemEntry(
     name: string,
     description: string,
     state: boolean,
     metadata: Record<string, unknown>,
-  );
-  abstract getItemEntry(id: number);
+  ): any;
+  abstract getItemEntry(id: number): any;
   //   abstract getAllItemEntries();
   //   abstract getAllItemEntriesByType(type: ItemType);
   //   abstract updateItemEntry(id: number, name: string, description: string, state: boolean, metadata: Record<string, any>);
