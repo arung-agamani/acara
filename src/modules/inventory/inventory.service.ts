@@ -62,10 +62,10 @@ export class InventoryService {
     name?: string,
     description?: string,
     state?: boolean,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ) {
     const now = new Date();
-    const updateValues: Record<string, any> = {
+    const updateValues: Record<string, unknown> = {
       updatedAt: now,
     };
     if (name !== undefined) {

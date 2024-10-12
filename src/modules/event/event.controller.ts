@@ -40,6 +40,12 @@ export class AcaraEventController {
 
   @Get(':id')
   async getEvent(@Param('id') id: number) {
+    if (isNaN(id)) {
+      throw new NotFoundException({
+        success: false,
+        errors: ['Invalid event ID'],
+      });
+    }
     const event = await this.eventService.getEventById(id);
     if (!event)
       throw new NotFoundException({

@@ -5,6 +5,7 @@ import {
   UseGuards,
   Request,
   Res,
+  Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './localAuthGuard';
@@ -33,10 +34,12 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const jwt = await this.authService.login(req.user!);
-    response.cookie(AUTH_COOKIE_NAME, jwt);
+    response.cookie(AUTH_COOKIE_NAME, jwt, { maxAge: 3600000, httpOnly: true });
+    const user = await this.authService.me(req.user!.username);
     return {
       success: true,
-      message: 'Logged in',
+      errors: [],
+      data: user,
     };
   }
 
@@ -44,5 +47,16 @@ export class AuthController {
   @Post('protected')
   getHello(@Request() req: ExpressRequest) {
     return `Hello ${req.user?.username}`;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async me(@Request() req: ExpressRequest) {
+    const userData = await this.authService.me(req.user!.username);
+    return {
+      success: true,
+      errors: [],
+      data: userData,
+    };
   }
 }

@@ -35,4 +35,10 @@ export class AuthService {
     const digest = await this.passwordService.hashPassword(password);
     return await this.userService.createUser(username, digest);
   }
+
+  async me(username: string) {
+    const user = await this.userService.getUserByUsername(username);
+    const { password, ...result } = user!;
+    return result;
+  }
 }

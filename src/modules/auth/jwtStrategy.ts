@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { Strategy } from 'passport-jwt';
@@ -28,6 +28,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: Payload) {
+    if (!payload) {
+      throw new UnauthorizedException({
+        success: false,
+        errors: ['Invalid token'],
+        data: null,
+      });
+    }
     return { userId: payload.sub, username: payload.username };
   }
 }

@@ -61,7 +61,6 @@ export class UsersService {
       })
       .from(user)
       .where(eq(user.username, username));
-    console.log(res);
     if (res.length === 0) return null;
     return res[0];
   }

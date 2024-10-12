@@ -69,7 +69,7 @@ export class InventoryController {
       name,
       description,
       state,
-      metadata,
+      metadata as Record<string, unknown>,
     );
   }
 
