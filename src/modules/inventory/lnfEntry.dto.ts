@@ -25,6 +25,9 @@ export class LnfEntryDto {
 
   @ApiProperty({ example: {}, type: 'object' })
   metadata!: object;
+
+  @ApiProperty({ example: 'client-uuid-123' })
+  externalId!: string;
 }
 
 export class CreateInventoryDto {
@@ -42,6 +45,9 @@ export class CreateInventoryDto {
 
   @ApiProperty({ example: {}, type: 'object' })
   readonly metadata!: object;
+
+  @ApiProperty({ example: 'client-uuid-123' })
+  readonly externalId!: string;
 }
 
 export class UpdateInventoryDto {
@@ -59,4 +65,7 @@ export class UpdateInventoryDto {
 
   @ApiProperty({ example: {}, type: 'object' })
   readonly metadata?: object;
+
+  @ApiProperty({ example: 'client-uuid-123' })
+  readonly externalId?: string;
 }

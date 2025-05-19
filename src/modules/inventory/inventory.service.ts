@@ -3,7 +3,7 @@ import { AcaraDb } from 'src/database/interface';
 import { lnfEntry } from 'src/database/schema';
 import { eq } from 'drizzle-orm';
 import { Inject, Injectable } from '@nestjs/common';
-import { ItemType } from './lnfEntry.dto';
+import { ItemType, CreateInventoryDto } from './lnfEntry.dto';
 
 @Injectable()
 export class InventoryService {
@@ -15,6 +15,7 @@ export class InventoryService {
     description: string,
     state: boolean = true,
     metadata: Record<string, unknown> = {},
+    clientId: string,
   ) {
     const now = new Date();
     const res = await this.db
@@ -27,6 +28,7 @@ export class InventoryService {
         createdAt: now,
         updatedAt: now,
         metadata,
+        externalId: clientId,
       })
       .returning();
     if (!res) throw new Error('error when adding item entry');
@@ -110,5 +112,43 @@ export class InventoryService {
       .execute();
     if (!res) throw new Error('error when hard deleting item entry');
     return res;
+  }
+
+  async syncInventoryEntries(entries: CreateInventoryDto[]) {
+    const now = new Date();
+    const inserted: any[] = [];
+    for (const entry of entries) {
+      // Check if entry with externalId exists
+      const existing = await this.db
+        .select()
+        .from(lnfEntry)
+        .where(eq(lnfEntry.externalId, entry.externalId))
+        .execute();
+      if (existing.length === 0) {
+        // Insert new entry
+        const itemType = entry.type as ItemType;
+        if (!Object.values(ItemType).includes(itemType)) {
+          // skip invalid type
+          continue;
+        }
+        const res = await this.db
+          .insert(lnfEntry)
+          .values({
+            name: entry.name,
+            description: entry.description,
+            type: itemType,
+            state: entry.state,
+            metadata: entry.metadata,
+            externalId: entry.externalId,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .returning();
+        if (res && res[0]) {
+          inserted.push(res[0]);
+        }
+      }
+    }
+    return { success: true, insertedCount: inserted.length, inserted };
   }
 }
