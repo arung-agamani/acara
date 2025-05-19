@@ -66,6 +66,7 @@ export const lnfEntry = pgTable('lnf_entries', {
   name: text('name'),
   type: text('type', { enum: ['lost', 'found', 'deposit', 'misc'] }),
   description: text('description'),
+  externalId: text('external_id').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
     .notNull()
     .default(sql`NOW()`),

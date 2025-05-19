@@ -8,6 +8,13 @@
       "when": 1724335108384,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1747676556416,
+      "tag": "0001_add_external_id_to_lnf_entries",
+      "breakpoints": true
     }
   ]
 }
