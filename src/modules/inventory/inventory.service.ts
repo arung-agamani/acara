@@ -143,7 +143,6 @@ export class InventoryService {
             updatedAt: now,
           })
           .returning();
-        console.log('inserted', res);
         if (res && res[0]) {
           inserted.push(res[0]);
         }
