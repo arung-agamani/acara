@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS "event_informations" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "lnf_audit_log" (
-	"id" integer,
+	"id" text,
 	"action" text,
 	"before_value" json,
 	"after_value" json,

@@ -62,7 +62,7 @@ export const eventInfo = pgTable(
 );
 
 export const lnfEntry = pgTable('lnf_entries', {
-  id: serial('id').primaryKey(),
+  id: text('id').primaryKey(), // changed from serial to string
   name: text('name'),
   type: text('type', { enum: ['lost', 'found', 'deposit', 'misc'] }),
   description: text('description'),

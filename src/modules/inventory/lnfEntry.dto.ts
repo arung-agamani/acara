@@ -8,8 +8,8 @@ export enum ItemType {
 }
 
 export class LnfEntryDto {
-  @ApiProperty({ example: 1 })
-  id!: number;
+  @ApiProperty()
+  id!: string;
 
   @ApiProperty({ example: 'Lost Wallet' })
   name!: string;
@@ -31,6 +31,9 @@ export class LnfEntryDto {
 }
 
 export class CreateInventoryDto {
+  @ApiProperty()
+  id!: string;
+
   @ApiProperty({ example: 'Lost Wallet' })
   readonly name!: string;
 
@@ -51,6 +54,9 @@ export class CreateInventoryDto {
 }
 
 export class UpdateInventoryDto {
+  @ApiProperty()
+  id!: string;
+
   @ApiProperty({ example: 'Lost Wallet' })
   readonly name!: string;
 

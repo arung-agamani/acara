@@ -48,7 +48,7 @@ export class InventoryController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') itemId: number) {
+  async findOne(@Param('id') itemId: string) {
     try {
       const data = await this.inventoryService.getItemEntry(itemId);
       return { success: true, errors: [], data };
@@ -67,7 +67,7 @@ export class InventoryController {
       `Adding new inventory item: ${JSON.stringify(createInventoryDto)}`,
     );
     try {
-      const { type, name, description, state, metadata, externalId } =
+      const { id, type, name, description, state, metadata, externalId } =
         createInventoryDto;
       const itemType: ItemType = type as ItemType;
 
@@ -77,6 +77,7 @@ export class InventoryController {
       }
 
       const data = await this.inventoryService.createItemEntry(
+        id,
         itemType,
         name,
         description,
@@ -100,7 +101,7 @@ export class InventoryController {
     @Body() updateInventoryDto: UpdateInventoryDto,
   ) {
     try {
-      const { name, description, state, metadata } = updateInventoryDto;
+      const { id, name, description, state, metadata } = updateInventoryDto;
       const data = await this.inventoryService.updateItemEntry(
         id,
         name,
@@ -120,7 +121,7 @@ export class InventoryController {
 
   @Delete(':id')
   async remove(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Query('hard_delete') hardDelete: string,
   ) {
     try {
@@ -141,20 +142,58 @@ export class InventoryController {
   }
 
   @Post('sync')
-  async sync(@Body() items: CreateInventoryDto[]) {
+  async sync(@Body() items: any[]) {
     try {
       if (!Array.isArray(items)) {
         throw new BadRequestException(
           'Payload must be an array of inventory items',
         );
       }
-      // Optionally: validate each item for required fields
-      const data = await this.inventoryService.syncInventoryEntries(items);
+      // Adapt each item to lnfEntry shape + metadata
+      const lnfFields = [
+        'id',
+        'name',
+        'description',
+        'type',
+        'state',
+        'externalId',
+        'createdAt',
+        'updatedAt',
+        'deletedAt',
+        'metadata',
+      ];
+      const adaptedItems = items.map((item) => {
+        // Extract lnfEntry fields
+        const lnfEntryData: Record<string, any> = {};
+        for (const key of lnfFields) {
+          if (item[key] !== undefined) lnfEntryData[key] = item[key];
+        }
+        // Everything else goes into metadata
+        const extraFields = Object.keys(item).filter(
+          (key) => !lnfFields.includes(key),
+        );
+        const extraMetadata: Record<string, any> = {};
+        for (const key of extraFields) {
+          extraMetadata[key] = item[key];
+        }
+        // Merge with existing metadata if present
+        lnfEntryData.metadata = {
+          ...(typeof lnfEntryData.metadata === 'object' && lnfEntryData.metadata
+            ? lnfEntryData.metadata
+            : {}),
+          ...extraMetadata,
+        };
+        return lnfEntryData;
+      });
+      // Ensure adaptedItems are typed as any[] to bypass DTO validation
+      const data = await this.inventoryService.syncInventoryEntries(
+        adaptedItems as any[],
+      );
       return { success: true, errors: [], data };
     } catch (err) {
       return {
         success: false,
-        errors: [/* err?.message ||  */ 'Failed to sync inventory items'],
+        errors: [err || 'Failed to sync inventory items'],
         data: null,
       };
     }

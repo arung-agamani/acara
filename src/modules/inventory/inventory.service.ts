@@ -1,7 +1,7 @@
 import { DrizzleAsyncProvider } from '../drizzle/drizzle.provider';
 import { AcaraDb } from 'src/database/interface';
 import { lnfEntry } from 'src/database/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { Inject, Injectable } from '@nestjs/common';
 import { ItemType, CreateInventoryDto } from './lnfEntry.dto';
 
@@ -10,6 +10,7 @@ export class InventoryService {
   constructor(@Inject(DrizzleAsyncProvider) private readonly db: AcaraDb) {}
 
   async createItemEntry(
+    id: string,
     type: ItemType,
     name: string,
     description: string,
@@ -21,6 +22,7 @@ export class InventoryService {
     const res = await this.db
       .insert(lnfEntry)
       .values({
+        id,
         name,
         description,
         type,
@@ -35,7 +37,7 @@ export class InventoryService {
     return res;
   }
 
-  async getItemEntry(id: number) {
+  async getItemEntry(id: string) {
     const item = await this.db
       .select()
       .from(lnfEntry)
@@ -60,7 +62,7 @@ export class InventoryService {
   }
 
   async updateItemEntry(
-    id: number,
+    id: string,
     name?: string,
     description?: string,
     state?: boolean,
@@ -91,7 +93,7 @@ export class InventoryService {
     return res;
   }
 
-  async deleteItemEntry(id: number) {
+  async deleteItemEntry(id: string) {
     const now = new Date();
     const res = await this.db
       .update(lnfEntry)
@@ -105,7 +107,7 @@ export class InventoryService {
     return res;
   }
 
-  async hardDeleteItemEntry(id: number) {
+  async hardDeleteItemEntry(id: string) {
     const res = await this.db
       .delete(lnfEntry)
       .where(eq(lnfEntry.id, id))
@@ -114,7 +116,7 @@ export class InventoryService {
     return res;
   }
 
-  async syncInventoryEntries(entries: CreateInventoryDto[]) {
+  async syncInventoryEntries(entries: any[]) {
     const now = new Date();
     const inserted: any[] = [];
     for (const entry of entries) {
@@ -122,18 +124,15 @@ export class InventoryService {
       const existing = await this.db
         .select()
         .from(lnfEntry)
-        .where(eq(lnfEntry.externalId, entry.externalId))
+        .where(eq(lnfEntry.id, entry.id))
         .execute();
       if (existing.length === 0) {
         // Insert new entry
         const itemType = entry.type as ItemType;
-        if (!Object.values(ItemType).includes(itemType)) {
-          // skip invalid type
-          continue;
-        }
         const res = await this.db
           .insert(lnfEntry)
           .values({
+            id: entry.id,
             name: entry.name,
             description: entry.description,
             type: itemType,
@@ -144,8 +143,37 @@ export class InventoryService {
             updatedAt: now,
           })
           .returning();
+        console.log('inserted', res);
         if (res && res[0]) {
           inserted.push(res[0]);
+        }
+      } else {
+        // Only update if entry exists and incoming updatedAt is newer
+        const serverEntry = existing[0];
+        const incomingUpdatedAt = entry.updatedAt
+          ? new Date(entry.updatedAt)
+          : now;
+        const serverUpdatedAt = serverEntry.updatedAt
+          ? new Date(serverEntry.updatedAt)
+          : now;
+        if (incomingUpdatedAt > serverUpdatedAt) {
+          const itemType = entry.type as ItemType;
+          const updateRes = await this.db
+            .update(lnfEntry)
+            .set({
+              name: entry.name,
+              description: entry.description,
+              type: itemType,
+              state: entry.state,
+              metadata: entry.metadata,
+              externalId: entry.externalId,
+              updatedAt: incomingUpdatedAt,
+            })
+            .where(eq(lnfEntry.id, entry.id))
+            .returning();
+          if (updateRes && updateRes[0]) {
+            inserted.push(updateRes[0]);
+          }
         }
       }
     }
